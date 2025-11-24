@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Thumb Reach Experiment - iPhone 16</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
+            background: #000;
+            touch-action: manipulation;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            width: 100%;
+            height: 100vh;
+            height: -webkit-fill-available;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            height: -webkit-fill-available;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 50px 20px 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+            display: none; /* Hidden during experiment */
+        }
+
+        .header.show {
+            display: block;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .content.full-screen {
+            padding: 0;
+            height: 100vh;
+            height: -webkit-fill-available;
+        }
+
+        .button-area {
+            order: -1;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 17px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            appearance: none;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:active {
+            background: #1d4ed8;
+        }
+
+        .btn-primary:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            padding: 16px 30px;
+            font-size: 17px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            appearance: none;
+            font-weight: 600;
+        }
+
+        .btn-secondary:active {
+            background: #eff6ff;
+        }
+
+        .input-group {
+            margin: 12px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 17px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .hand-selection {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .hand-btn {
+            flex: 1;
+            padding: 50px 20px;
+            border: 3px solid #ddd;
+            border-radius: 16px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .hand-btn:active {
+            transform: scale(0.95);
+            background: #eff6ff;
+        }
+
+        .hand-btn.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .hand-btn .emoji {
+            font-size: 70px;
+            margin-bottom: 12px;
+        }
+
+        .hand-btn .text {
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .instruction {
+            background: #eff6ff;
+            padding: 18px;
+            border-radius: 12px;
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .instruction h3 {
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+
+        .instruction p {
+            margin: 8px 0;
+        }
+
+        .experiment-area {
+            position: relative;
+            flex: 1;
+            background: #fafafa;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            margin: 10px 0;
+            min-height: 500px;
+            touch-action: none;
+        }
+
+        .calibration-area-full {
+            min-height: 600px !important;
+            flex: 1;
+        }
+
+        .target-btn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-container {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2.5px solid #2563eb;
+            border-radius: 28px;
+            padding: 10px 14px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            min-width: 240px;
+        }
+
+        .search-input {
+            border: none;
+            outline: none;
+            font-size: 17px;
+            padding: 6px 10px;
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            pointer-events: none;  /* Input itself is NOT touchable */
+        }
+
+        .search-btn {
+            position: absolute;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 16px;
+            font-weight: 600;
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+            pointer-events: auto;
+            z-index: 50000;
+        }
+
+        .search-btn:active {
+            background: #1d4ed8;
+            transform: scale(0.95);
+        }
+
+        .target-text {
+            position: fixed;
+            top: 70px; /* Positioned below search bar */
+            left: 50%;
+            transform: translateX(-50%); /* Only center horizontally, not vertically */
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 12px;
+            color: #1f2937;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            border: 3px solid #fbbf24;
+            z-index: 100000; /* Very high z-index to stay above keyboard */
+            pointer-events: none; /* Doesn't block touches */
+        }
+
+        .search-bar-top {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+        }
+
+        .target-btn:active {
+            transform: scale(0.9);
+        }
+
+        .target-btn.success {
+            background: #10b981;
+        }
+
+        .target-btn.error {
+            background: #ef4444;
+        }
+
+        .progress {
+            background: #e5e7eb;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            background: #2563eb;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            background: #f9fafb;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .result-card {
+            background: #f9fafb;
+            padding: 18px;
+            border-radius: 12px;
+            margin: 8px 0;
+        }
+
+        .result-card h3 {
+            color: #2563eb;
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 15px;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .countdown {
+            font-size: 80px;
+            font-weight: 700;
+            color: #2563eb;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .alert-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-weight: 600;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .alert-box.success {
+            background: #10b981;
+        }
+
+        .alert-box.info {
+            background: #2563eb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .upload-status {
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .upload-status.uploading {
+            background: #fef3c7;
+        }
+
+        .upload-status.success {
+            background: #d1fae5;
+        }
+
+        .upload-status.error {
+            background: #fee2e2;
+        }
+
+        /* iPhone 16 Safe Area */
+        @supports (padding: env(safe-area-inset-top)) {
+            .header {
+                padding-top: calc(env(safe-area-inset-top) + 15px);
+            }
+
+            .content {
+                padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+            }
+        }
+
+        /* Prevent overscroll */
+        body {
+            overscroll-behavior: none;
+        }
+
+        .container {
+            overscroll-behavior: contain;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header show">
+        <h1>Thumb-Adaptive Search UI Experiment</h1>
+        <p>iPhone 16 최적화 버전</p>
+    </div>
+
+    <div class="content" id="main-content">
+        <!-- Screen 1: Welcome & Info -->
+        <div class="screen active" id="screen-welcome">
+            <div class="button-area">
+                <button class="btn-primary" id="btn-start">시작하기</button>
+            </div>
+
+            <div class="content-area">
+                <h2>실험 참여를 환영합니다</h2>
+                <div class="instruction">
+                    <h3>실험 안내</h3>
+                    <p>본 실험은 iPhone 16에서 한 손 엄지 조작 시 검색창 배치에 따른 효율성을 측정합니다.</p>
+                    <p style="margin-top: 8px;">• 소요 시간: 약 3-5분</p>
+                    <p>• 세로 모드 전용</p>
+                    <p>• 편안한 자세로 참여해주세요</p>
+                </div>
+
+                <div class="input-group">
+                    <label>이름</label>
+                    <input type="text" id="input-name" placeholder="이름을 입력하세요">
+                </div>
+
+                <div class="input-group">
+                    <label>학번</label>
+                    <input type="text" id="input-studentid" placeholder="학번을 입력하세요">
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Hand Selection -->
+        <div class="screen" id="screen-hand">
+            <div class="button-area">
+                <button class="btn-primary hidden" id="btn-hand-next">다음</button>
+            </div>
+
+            <div class="content-area">
+                <h2>사용 손 선택</h2>
+                <div class="instruction">
+                    <p>실험 동안 주로 사용할 손을 선택해주세요.</p>
+                </div>
+
+                <div class="hand-selection">
+                    <div class="hand-btn" id="hand-left">
+                        <div class="emoji">🤚</div>
+                        <div class="text">왼손</div>
+                    </div>
+                    <div class="hand-btn" id="hand-right">
+                        <div class="emoji">🖐️</div>
+                        <div class="text">오른손</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Calibration Instructions -->
+        <div class="screen" id="screen-calib-intro">
+            <div class="button-area">
+                <button class="btn-primary" id="btn-start-calib">측정 시작</button>
+            </div>
+
+            <div class="content-area">
+                <h2>터치 가능한 영역 측정</h2>
+                <div class="instruction">
+                    <h3>측정 방법</h3>
+                    <p style="color:#ef4444; font-weight:600;">폰 뒷면 카메라에 검지손가락을 고정하시오.</p>
+                    <p>1. 화면에 손가락을 대고 <strong>그리듯이</strong> 움직여주세요</p>
+                    <p>2. 선택한 손의 엄지손가락만 사용합니다</p>
+                    <p>3. <strong>손목을 움직이지 않고</strong> 편안하게 도달할 수 있는 모든 연속적인 영역을 칠해주세요</p>
+                    <p>4. 도달 가능한 영역의 경계를 따라 그리면 더 정확합니다</p>
+                    <p>5. 파란색으로 칠해지는 영역이 측정 영역입니다</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Calibration -->
+        <div class="screen" id="screen-calibration">
+            <div class="button-area">
+                <button class="btn-secondary" id="btn-finish-calib">측정 완료</button>
+            </div>
+
+            <div class="content-area" style="flex: 1; display: flex; flex-direction: column;">
+                <!-- Removed title, description, progress bar, and stats -->
+                <div class="experiment-area calibration-area-full" id="calibration-area" style="position: relative; overflow: hidden; flex: 1;">
+                    <canvas id="calibration-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: Experiment Instructions -->
+        <div class="screen" id="screen-exp-intro">
+            <div class="button-area">
+                <button class="btn-primary" id="btn-start-exp">실험 시작</button>
+            </div>
+
+            <div class="content-area">
+                <h2>본 실험 안내</h2>
+                <div class="instruction">
+                    <h3>실험 방법</h3>
+                    <p>1. 세 가지 조건에서 동일한 과제를 수행합니다</p>
+                    <p style="margin-left: 20px;">• <strong>Fixed:</strong> 버튼이 화면 우측 상단에 고정</p>
+                    <p style="margin-left: 20px;">• <strong>Static:</strong> 캘리브레이션을 무시하고, 하드코딩된 평균 엄지 궤적(Arc) 위에 버튼 배치</p>
+                    <p style="margin-left: 20px;">• <strong>Personalized:</strong> 캘리브레이션 점들로 원 적합(Circle Fitting)한 개인화 궤적(Arc) 위에 버튼 배치</p>
+                    <p style="margin-top: 10px;">2. 화면에 표시되는 <strong>3글자 영문</strong>을 검색창에 입력하고 리턴 키를 누릅니다</p>
+                    <p>3. <strong>⚠️ 중요: 검색창은 🔍 검색 버튼을 터치해야만 사용할 수 있습니다</strong></p>
+                    <p>4. 키보드가 열리면 문자를 입력하고 리턴(Return) 키를 눌러주세요</p>
+                    <p>5. 최대한 빠르고 정확하게 입력해주세요</p>
+                    <p>6. 각 조건마다 <strong>5번</strong>의 시도가 있습니다</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 6: Experiment (Fixed/Adaptive) -->
+        <div class="screen" id="screen-experiment">
+            <div class="experiment-area" id="experiment-area"></div>
+        </div>
+
+        <!-- Screen 7: Rest -->
+        <div class="screen" id="screen-rest">
+            <div class="button-area">
+                <button class="btn-primary hidden" id="btn-continue">다음 실험 시작</button>
+            </div>
+
+            <div class="content-area">
+                <h2>휴식 시간</h2>
+                <div class="instruction">
+                    <p id="rest-message">실험이 완료되었습니다.</p>
+                    <p>3초간 휴식 후 다음 실험을 진행합니다.</p>
+                </div>
+                <div class="countdown" id="rest-countdown">3</div>
+            </div>
+        </div>
+
+        <!-- Screen 8: Results -->
+        <div class="screen" id="screen-results">
+            <div class="button-area">
+                <button class="btn-primary hidden" id="btn-download">백업 다운로드</button>
+            </div>
+
+            <div class="content-area">
+                <h2>실험 완료!</h2>
+                <div class="instruction">
+                    <p>실험에 참여해 주셔서 감사합니다.</p>
+                    <p>결과를 자동으로 저장하고 있습니다...</p>
+                </div>
+
+                <div class="upload-status" id="upload-status">
+                    <div class="loading"></div>
+                    <p style="margin-top: 10px;">결과 업로드 중...</p>
+                </div>
+
+                <div class="result-card">
+                    <h3>Fixed (Top-Right)</h3>
+                    <div class="result-row">
+                        <span>평균 완료 시간</span>
+                        <span id="result-fixed-time">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span>오류율</span>
+                        <span id="result-fixed-error">-</span>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Static (Hardcoded Arc)</h3>
+                    <div class="result-row">
+                        <span>평균 완료 시간</span>
+                        <span id="result-static-time">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span>오류율</span>
+                        <span id="result-static-error">-</span>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Personalized (Fitted Arc)</h3>
+                    <div class="result-row">
+                        <span>평균 완료 시간</span>
+                        <span id="result-personalized-time">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span>오류율</span>
+                        <span id="result-personalized-error">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+</div>
+
+<script>
+    // CONFIGURATION - Google Apps Script Web App URL
+    var UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbxqjBY6HzoTmuJwlYNgp_E-3Q4RjSCtJzQi_0VBk4RLUAWjttGH1SPcEHg_KVMsQ3Ju/exec';
+
+    // iPhone keyboard layout (QWERTY)
+    // Left side keys: q, w, e, r, t, a, s, d, f, g, z, x, c, v, b
+    // Right side keys: y, u, i, o, p, h, j, k, l, n, m
+    var LEFT_KEYS = ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'];
+    var RIGHT_KEYS = ['y', 'u', 'i', 'o', 'p', 'h', 'j', 'k', 'l', 'n', 'm'];
+
+    // String pools with LEFT-RIGHT-LEFT pattern (1st char: left, 2nd char: right, 3rd char: left)
+    var STRING_POOLS = {
+        pool1: ['qua', 'rye', 'dye', 'bye', 'aye'],
+        pool2: ['vie', 'die', 'tie', 'sue', 'cue'],
+        pool3: ['woe', 'toe', 'roe', 'foe', 'rue'],
+        pool4: ['due', 'awe', 'owe', 'ewe', 'eye']
+    };
+
+    // Latin Square orders (4x4)
+    var LATIN_SQUARE = [
+        [1, 2, 3, 4],
+        [2, 3, 4, 1],
+        [3, 4, 1, 2],
+        [4, 1, 2, 3]
+    ];
+
+    // Global variables
+    var participantData = {
+        name: '',
+        studentId: '',
+        handedness: '',
+        reachableZone: [],
+        experiments: [],
+        latinSquareRow: 0,
+        stringPool: [],
+        deviceInfo: null,
+        calculatedArc: null,
+        touchPosition: null
+    };
+
+    var currentScreen = 'screen-welcome';
+    var calibrationPoints = [];
+    var experimentOrder = [];
+    var currentExperimentIndex = 0;
+    var currentTrial = 0;
+    var trialStartTime = 0;
+    var currentCondition = '';
+    var experimentData = [];
+    var currentTargetString = '';
+    var searchInputStartTime = 0;
+    var restInterval = null;
+    var areaClickHandler = null;
+    var participantCounter = 0; // Track participant order for Latin Square
+    var lastTouchPosition = null; // 마지막 버튼 터치 좌표 저장
+
+    // Device info helper
+    function getDeviceInfo() {
+        return {
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            devicePixelRatio: window.devicePixelRatio || 1
+        };
+    }
+
+    // Kasa method (least squares) for circle fitting: x^2 + y^2 + A x + B y + C = 0
+    function fitCircle(points) {
+        if (!points || points.length < 3) return null;
+
+        // Build normal equations for least squares
+        var Sxx = 0, Syy = 0, Sxy = 0, Sx = 0, Sy = 0, Sz = 0, Sxz = 0, Syz = 0, n = points.length;
+        for (var i = 0; i < n; i++) {
+            var x = points[i].x;
+            var y = points[i].y;
+            var z = -(x*x + y*y);
+            Sx += x; Sy += y; Sz += z;
+            Sxx += x*x; Syy += y*y; Sxy += x*y;
+            Sxz += x*z; Syz += y*z;
+        }
+
+        // Solve 3x3: [ [Sxx, Sxy, Sx], [Sxy, Syy, Sy], [Sx, Sy, n] ] * [A, B, C] = [Sxz, Syz, Sz]
+        var A = [
+            [Sxx, Sxy, Sx],
+            [Sxy, Syy, Sy],
+            [Sx,  Sy,  n ]
+        ];
+        var b = [Sxz, Syz, Sz];
+
+        var sol = solve3x3(A, b);
+        if (!sol) return null;
+
+        var Acoef = sol[0], Bcoef = sol[1], Ccoef = sol[2];
+        var centerX = -Acoef / 2;
+        var centerY = -Bcoef / 2;
+        var radiusSq = (Acoef*Acoef + Bcoef*Bcoef)/4 - Ccoef;
+        var radius = radiusSq > 0 ? Math.sqrt(radiusSq) : 0;
+        if (!isFinite(centerX) || !isFinite(centerY) || !isFinite(radius) || radius <= 0) return null;
+        return {centerX: centerX, centerY: centerY, radius: radius};
+    }
+
+    function solve3x3(M, v) {
+        // Gaussian elimination with partial pivoting
+        var a = [M[0].slice(), M[1].slice(), M[2].slice()];
+        var b = v.slice();
+        for (var i = 0; i < 3; i++) {
+            // pivot
+            var maxRow = i;
+            for (var r = i+1; r < 3; r++) {
+                if (Math.abs(a[r][i]) > Math.abs(a[maxRow][i])) maxRow = r;
+            }
+            if (Math.abs(a[maxRow][i]) < 1e-12) return null; // singular
+            if (maxRow !== i) {
+                var tmp = a[i]; a[i] = a[maxRow]; a[maxRow] = tmp;
+                var tb = b[i]; b[i] = b[maxRow]; b[maxRow] = tb;
+            }
+            // eliminate
+            for (var r2 = i+1; r2 < 3; r2++) {
+                var f = a[r2][i] / a[i][i];
+                b[r2] -= f * b[i];
+                for (var c = i; c < 3; c++) {
+                    a[r2][c] -= f * a[i][c];
+                }
+            }
+        }
+        // back substitution
+        var x = [0,0,0];
+        for (var i2 = 2; i2 >= 0; i2--) {
+            var sum = b[i2];
+            for (var j = i2+1; j < 3; j++) sum -= a[i2][j] * x[j];
+            x[i2] = sum / a[i2][i2];
+        }
+        return x;
+    }
+
+    // Hardcoded average thumb arc (right-hand) based on viewport
+    function getStaticArc(areaWidth, areaHeight) {
+        // Center outside the right edge, near bottom-right; radius based on screen size
+        var centerX = areaWidth + areaWidth * 0.4;
+        var centerY = areaHeight * 0.9;
+        var radius = Math.max(areaWidth, areaHeight) * 0.95;
+        return {centerX: centerX, centerY: centerY, radius: radius};
+    }
+
+    // Alert replacement function
+    function showAlert(message, type) {
+        type = type || 'error';
+        var alertBox = document.createElement('div');
+        alertBox.className = 'alert-box ' + type;
+        alertBox.textContent = message;
+        document.body.appendChild(alertBox);
+
+        setTimeout(function() {
+            alertBox.style.opacity = '0';
+            alertBox.style.transition = 'opacity 0.3s';
+            setTimeout(function() {
+                if (alertBox.parentNode) {
+                    document.body.removeChild(alertBox);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Initialize event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('btn-start').addEventListener('click', startExperiment);
+        document.getElementById('hand-left').addEventListener('click', function() { selectHand('left'); });
+        document.getElementById('hand-right').addEventListener('click', function() { selectHand('right'); });
+        document.getElementById('btn-hand-next').addEventListener('click', nextToCalibration);
+        document.getElementById('btn-start-calib').addEventListener('click', startCalibration);
+        document.getElementById('btn-finish-calib').addEventListener('click', finishCalibration);
+        document.getElementById('btn-start-exp').addEventListener('click', startMainExperiment);
+        document.getElementById('btn-continue').addEventListener('click', continueToSecondExperiment);
+        document.getElementById('btn-download').addEventListener('click', downloadResults);
+
+        // Prevent viewport resize when keyboard opens
+        window.addEventListener('resize', function() {
+            // Let Safari handle the viewport naturally
+        });
+
+        // Detect keyboard open/close and lock layout
+        var originalHeight = window.innerHeight;
+        window.addEventListener('focusin', function() {
+            document.body.classList.add('keyboard-open');
+            var expArea = document.getElementById('experiment-area');
+            if (expArea) {
+                expArea.classList.add('keyboard-active');
+            }
+        });
+
+        window.addEventListener('focusout', function() {
+            document.body.classList.remove('keyboard-open');
+            var expArea = document.getElementById('experiment-area');
+            if (expArea) {
+                expArea.classList.remove('keyboard-active');
+            }
+            // Force scroll to top
+            window.scrollTo(0, 0);
+        });
+    });
+
+    function showScreen(screenId) {
+        var screens = document.querySelectorAll('.screen');
+        for (var i = 0; i < screens.length; i++) {
+            screens[i].classList.remove('active');
+        }
+        document.getElementById(screenId).classList.add('active');
+        currentScreen = screenId;
+
+        // Hide header and make content full-screen for experiment and calibration
+        var header = document.querySelector('.header');
+        var content = document.getElementById('main-content');
+
+        if (screenId === 'screen-experiment' || screenId === 'screen-calibration') {
+            header.classList.remove('show');
+            content.classList.add('full-screen');
+        } else {
+            header.classList.add('show');
+            content.classList.remove('full-screen');
+        }
+    }
+
+    function startExperiment() {
+        var name = document.getElementById('input-name').value.trim();
+        var studentId = document.getElementById('input-studentid').value.trim();
+
+        if (!name || !studentId) {
+            showAlert('이름과 학번을 입력해주세요.', 'error');
+            return;
+        }
+
+        participantData.name = name;
+        participantData.studentId = studentId;
+        participantData.timestamp = new Date().toISOString();
+        participantData.deviceInfo = getDeviceInfo();
+
+        // Assign Latin Square row based on participant order
+        // You can modify this to use studentId hash if you want consistency
+        participantCounter = (participantCounter + 1) % 4;
+        participantData.latinSquareRow = participantCounter;
+
+        // Assign string pool order based on Latin Square
+        var poolOrder = LATIN_SQUARE[participantCounter];
+        participantData.stringPoolOrder = poolOrder;
+
+        showScreen('screen-hand');
+    }
+
+    function selectHand(hand) {
+        participantData.handedness = hand;
+        var buttons = document.querySelectorAll('.hand-btn');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove('selected');
+        }
+        document.getElementById('hand-' + hand).classList.add('selected');
+        document.getElementById('btn-hand-next').classList.remove('hidden');
+    }
+
+    function nextToCalibration() {
+        if (!participantData.handedness) {
+            showAlert('사용 손을 선택해주세요.', 'error');
+            return;
+        }
+        showScreen('screen-calib-intro');
+    }
+
+    function startCalibration() {
+        showScreen('screen-calibration');
+        setupContinuousCalibration();
+    }
+
+    function setupContinuousCalibration() {
+        var area = document.getElementById('calibration-area');
+        var canvas = document.getElementById('calibration-canvas');
+        var ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = area.clientWidth;
+        canvas.height = area.clientHeight;
+
+        calibrationPoints = [];
+        var isDrawing = false;
+
+        // Clear canvas with semi-transparent background
+        ctx.fillStyle = 'rgba(250, 250, 250, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Handle touch/click events
+        var startDrawing = function(e) {
+            e.preventDefault();
+            isDrawing = true;
+            handleTouch(e);
+        };
+
+        var stopDrawing = function(e) {
+            e.preventDefault();
+            isDrawing = false;
+        };
+
+        var handleTouch = function(e) {
+            if (!isDrawing && e.type !== 'touchstart' && e.type !== 'mousedown') return;
+            e.preventDefault();
+
+            var rect = area.getBoundingClientRect();
+            var touch = e.touches ? e.touches[0] : e;
+            var x = touch.clientX - rect.left;
+            var y = touch.clientY - rect.top;
+
+            // Record point
+            calibrationPoints.push({
+                x: x,
+                y: y,
+                reachable: true,
+                timestamp: Date.now()
+            });
+
+            // Draw continuous area
+            drawReachableArea(ctx, x, y);
+
+            // Update progress
+            updateCalibrationProgress();
+        };
+
+        // Add event listeners
+        area.addEventListener('touchstart', startDrawing);
+        area.addEventListener('touchmove', handleTouch);
+        area.addEventListener('touchend', stopDrawing);
+        area.addEventListener('mousedown', startDrawing);
+        area.addEventListener('mousemove', handleTouch);
+        area.addEventListener('mouseup', stopDrawing);
+        area.addEventListener('mouseleave', stopDrawing);
+
+        // Store handlers for cleanup
+        area._handlers = {
+            start: startDrawing,
+            move: handleTouch,
+            end: stopDrawing
+        };
+    }
+
+    function drawReachableArea(ctx, x, y) {
+        // Draw a filled circle with gradient
+        var gradient = ctx.createRadialGradient(x, y, 0, x, y, 30);
+        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.4)');
+        gradient.addColorStop(1, 'rgba(37, 99, 235, 0.1)');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, 30, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    function updateCalibrationProgress() {
+        var count = calibrationPoints.length;
+        // Progress tracking removed from UI but still tracked internally
+
+        // Progress bar and stats are now hidden
+        // Data still collected for validation
+    }
+
+    function finishCalibration() {
+        if (calibrationPoints.length < 10) {
+            showAlert('최소 10개 이상의 지점을 터치해주세요.', 'error');
+            return;
+        }
+
+        // Clean up event listeners
+        var area = document.getElementById('calibration-area');
+        if (area._handlers) {
+            area.removeEventListener('touchstart', area._handlers.start);
+            area.removeEventListener('touchmove', area._handlers.move);
+            area.removeEventListener('touchend', area._handlers.end);
+            area.removeEventListener('mousedown', area._handlers.start);
+            area.removeEventListener('mousemove', area._handlers.move);
+            area.removeEventListener('mouseup', area._handlers.end);
+            area.removeEventListener('mouseleave', area._handlers.end);
+        }
+
+        participantData.reachableZone = calibrationPoints;
+        // 계산된 개인화 원(Arc) 저장
+        var fitted = fitCircle(calibrationPoints.map(function(p){ return {x:p.x, y:p.y}; }));
+        if (fitted && isFinite(fitted.centerX) && isFinite(fitted.centerY) && isFinite(fitted.radius)) {
+            participantData.calculatedArc = fitted;
+        } else {
+            participantData.calculatedArc = null;
+        }
+
+        // 세 조건(Fixed, Static, Personalized) 무작위 순서 적용
+        var base = ['fixed', 'static', 'personalized'];
+        experimentOrder = base.sort(function(){ return Math.random() - 0.5; });
+
+        console.log('Experiment order:', experimentOrder);
+
+        // Prepare string pools for this participant based on Latin Square
+        prepareStringPools();
+
+        showScreen('screen-exp-intro');
+    }
+
+    function prepareStringPools() {
+        // Get the pool order for this participant
+        var poolOrder = participantData.stringPoolOrder;
+        var allStrings = [];
+
+        // Collect strings from pools in the order specified by Latin Square
+        for (var i = 0; i < poolOrder.length; i++) {
+            var poolNum = poolOrder[i];
+            var poolKey = 'pool' + poolNum;
+            allStrings = allStrings.concat(STRING_POOLS[poolKey]);
+        }
+
+        participantData.stringPool = allStrings;
+    }
+
+    function startMainExperiment() {
+        currentExperimentIndex = 0;
+        startCondition(experimentOrder[0]);
+    }
+
+    function startCondition(condition) {
+        currentCondition = condition;
+        currentTrial = 0;
+        experimentData = [];
+
+        console.log('Starting condition:', condition, 'Trial count:', currentTrial);
+
+        // No title or description shown during experiment
+        showScreen('screen-experiment');
+
+        // Clear the experiment area from previous condition (including old input with accumulated event listeners)
+        var area = document.getElementById('experiment-area');
+        area.innerHTML = '';
+
+        // Create search bar once for this condition with FRESH input element
+        var position = generateSearchBarPosition(currentCondition);
+
+        var searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container';
+        searchContainer.id = 'search-container-fixed';
+        searchContainer.style.left = position.x + 'px';
+        searchContainer.style.top = position.y + 'px';
+
+        var input = document.createElement('input');
+        input.className = 'search-input';
+        input.id = 'search-input-main';
+        input.type = 'text';
+        input.placeholder = '검색어를 입력하세요...';
+        input.maxLength = 999;
+        input.autocomplete = 'off';
+        input.autocorrect = 'off';
+        input.autocapitalize = 'off';
+        input.spellcheck = false;
+        input.style.caretColor = '#2563eb';
+        input.inputMode = 'text';
+
+        searchContainer.appendChild(input);
+        area.appendChild(searchContainer);
+
+        console.log('Search container created with fresh input element, starting first trial');
+        startTrial();
+    }
+
+    function generateSearchBarPosition(condition) {
+        // Search bar is ALWAYS at the top, full width
+        // Same position in both Fixed and Adaptive conditions
+        var x = 0;
+        var y = 0; // Top of window (no margin)
+
+        return {x: x, y: y, zone: 'top-full-width'};
+    }
+
+    function generateSearchButtonPosition(condition) {
+        var area = document.getElementById('experiment-area');
+        var areaWidth = area.clientWidth;
+        var areaHeight = area.clientHeight || window.innerHeight; // Use actual viewport height
+
+        var buttonWidth = 80;
+        var buttonHeight = 44;
+        var searchBarHeight = 50; // Height of search bar at top
+        var targetStringHeight = 120; // Reserve space for target string below search bar
+
+        if (condition === 'fixed') {
+            // Fixed position: Top-right corner, aligned with search bar
+            var x = areaWidth - buttonWidth - 10; // 10px from right
+            var y = 5; // Aligned with search bar (small top margin)
+
+            return {x: x, y: y, zone: 'top-right-fixed'};
+        } else if (condition === 'static' || condition === 'personalized') {
+            // Arc-based placement
+            var minY = searchBarHeight + targetStringHeight + 10;
+            var arc = null;
+            if (condition === 'static') {
+                arc = getStaticArc(areaWidth, areaHeight);
+            } else {
+                arc = participantData.calculatedArc || null;
+            }
+
+            if (!arc) {
+                // Fallback to fixed if arc not available
+                var fx = areaWidth - buttonWidth - 10;
+                var fy = 5;
+                return {x: fx, y: fy, zone: 'top-right-fixed-fallback'};
+            }
+
+            var attempts = 0;
+            var maxAttempts = 360; // try many angles
+            while (attempts < maxAttempts) {
+                // Sample angle from a practical range (right side sweep)
+                var theta = -Math.PI + Math.random() * (Math.PI); // [-pi, 0]
+                var px = arc.centerX + arc.radius * Math.cos(theta);
+                var py = arc.centerY + arc.radius * Math.sin(theta);
+
+                // Center button on this point, clamp within safe area
+                var bx = Math.max(10, Math.min(areaWidth - buttonWidth - 10, px - buttonWidth / 2));
+                var by = Math.max(minY, Math.min(areaHeight - buttonHeight - 10, py - buttonHeight / 2));
+
+                // Validate inside content area and not overlapping header regions
+                if (bx > 10 &&
+                    bx < areaWidth - buttonWidth - 10 &&
+                    by > minY &&
+                    by < areaHeight - buttonHeight - 10) {
+                    return {x: bx, y: by, zone: condition + '-arc'};
+                }
+                attempts++;
+            }
+
+            // As a last resort, place at average lower-right quadrant point on the circle
+            var theta2 = -Math.PI / 4;
+            var px2 = arc.centerX + arc.radius * Math.cos(theta2);
+            var py2 = arc.centerY + arc.radius * Math.sin(theta2);
+            var bx2 = Math.max(10, Math.min(areaWidth - buttonWidth - 10, px2 - buttonWidth / 2));
+            var by2 = Math.max(minY, Math.min(areaHeight - buttonHeight - 10, py2 - buttonHeight / 2));
+            return {x: bx2, y: by2, zone: condition + '-arc-fallback'};
+        } else {
+            // Unknown condition -> fallback fixed
+            var x2 = areaWidth - buttonWidth - 10;
+            var y2 = 5;
+            return {x: x2, y: y2, zone: 'top-right-fixed-fallback-unknown'};
+        }
+    }
+
+    function startTrial() {
+        console.log('startTrial called - currentTrial:', currentTrial, 'currentCondition:', currentCondition);
+
+        if (currentTrial >= 5) {  // 5 trials per condition
+            console.log('Condition complete, finishing...');
+            finishCondition();
+            return;
+        }
+
+        var area = document.getElementById('experiment-area');
+
+        // Remove previous event listener
+        if (areaClickHandler) {
+            area.removeEventListener('click', areaClickHandler);
+        }
+
+        // Clear only the dynamic elements (keep search bar)
+        var searchContainer = document.getElementById('search-container-fixed');
+        var targetDisplay = area.querySelector('.target-text');
+        var oldButton = area.querySelector('.search-btn');
+
+        if (targetDisplay) targetDisplay.remove();
+        if (oldButton) oldButton.remove();
+
+        // Get string from pool based on current trial and condition
+        var trialIndex = (currentExperimentIndex * 5) + currentTrial;
+        currentTargetString = participantData.stringPool[trialIndex % participantData.stringPool.length];
+
+        console.log('Trial', currentTrial + 1, 'Target string:', currentTargetString);
+
+        // Display target string
+        targetDisplay = document.createElement('div');
+        targetDisplay.className = 'target-text';
+        targetDisplay.textContent = currentTargetString;
+        area.appendChild(targetDisplay);
+
+        // Get the existing search input and clone it to remove all old event listeners
+        var oldInput = document.getElementById('search-input-main');
+        if (!oldInput) {
+            console.error('Search input not found!');
+            return;
+        }
+
+        // Clone the input to remove all event listeners
+        var input = oldInput.cloneNode(true);
+        oldInput.parentNode.replaceChild(input, oldInput);
+
+        input.value = ''; // Clear previous input
+        // REMOVED: input.focus() - NO automatic keyboard opening
+
+        // Create search button (separate, outside container)
+        var searchBtn = document.createElement('button');
+        searchBtn.className = 'search-btn';
+        searchBtn.textContent = '검색';
+
+        // Position search button based on condition
+        var buttonPosition = generateSearchButtonPosition(currentCondition);
+        searchBtn.style.left = buttonPosition.x + 'px';
+        searchBtn.style.top = buttonPosition.y + 'px';
+
+        console.log('Button position:', buttonPosition);
+
+        area.appendChild(searchBtn); // Button added separately to area
+
+        // Start timing
+        trialStartTime = Date.now();
+        searchInputStartTime = 0;
+        var keyboardOpened = false;
+
+        // Search button click: Opens keyboard by focusing input
+        var openKeyboard = function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            if (!keyboardOpened) {
+                keyboardOpened = true;
+                searchInputStartTime = Date.now();
+            }
+
+            // Directly focus without setTimeout for better Safari compatibility
+            input.focus();
+        };
+
+        // Use both click and touchend for maximum compatibility
+        searchBtn.addEventListener('click', function(e){
+            // 마우스/탭 클릭 좌표 기록
+            if (typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+                lastTouchPosition = {x: e.clientX, y: e.clientY};
+                participantData.touchPosition = lastTouchPosition;
+            }
+            openKeyboard(e);
+        }, {passive: false});
+
+        searchBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+                var t = e.touches && e.touches[0];
+                if (t) {
+                    lastTouchPosition = {x: t.clientX, y: t.clientY};
+                    participantData.touchPosition = lastTouchPosition;
+                }
+            } catch(_) {}
+        }, {passive: false});
+
+        searchBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openKeyboard(e);
+        }, {passive: false});
+
+        // Prevent input from being directly tapped (only via button)
+        input.addEventListener('touchstart', function(e) {
+            if (!keyboardOpened) {
+                e.preventDefault();
+                e.stopPropagation();
+                // If user taps input directly, treat it like button tap
+                openKeyboard();
+            }
+        }, {passive: false});
+
+        // Input focus: Start typing timer
+        input.addEventListener('focus', function() {
+            if (searchInputStartTime === 0) {
+                searchInputStartTime = Date.now();
+            }
+        });
+
+        // Handle Enter/Return key
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault();
+                submitSearch();
+            }
+        });
+
+        // Also handle when keyboard "Go" button is pressed
+        var submitSearch = function() {
+            var completionTime = Date.now() - trialStartTime;
+            var userInput = input.value.toLowerCase();
+            var isCorrect = userInput === currentTargetString.toLowerCase();
+            var typingTime = searchInputStartTime > 0 ? (Date.now() - searchInputStartTime) : 0;
+
+            // Get button position for logging
+            var buttonPosition = generateSearchButtonPosition(currentCondition);
+
+            experimentData.push({
+                trial: currentTrial + 1,
+                targetString: currentTargetString,
+                userInput: userInput,
+                buttonPosition: buttonPosition,
+                touchPosition: lastTouchPosition ? {x:lastTouchPosition.x, y:lastTouchPosition.y} : null,
+                deviceInfo: getDeviceInfo(),
+                calculatedArc: participantData.calculatedArc,
+                completionTime: completionTime,
+                typingTime: typingTime,
+                error: !isCorrect
+            });
+
+            // Visual feedback
+            var searchContainer = document.getElementById('search-container-fixed');
+            if (isCorrect) {
+                searchContainer.style.borderColor = '#10b981';
+                searchContainer.style.background = '#d1fae5';
+            } else {
+                searchContainer.style.borderColor = '#ef4444';
+                searchContainer.style.background = '#fee2e2';
+            }
+
+            // Blur input to close keyboard
+            input.blur();
+
+            setTimeout(function() {
+                // Reset search container styling
+                searchContainer.style.borderColor = '';
+                searchContainer.style.background = '';
+
+                currentTrial++;
+                updateExperimentStats();
+                startTrial();
+            }, 500);
+        };
+
+        updateExperimentStats();
+    }
+
+    function updateExperimentStats() {
+        // Stats are now hidden, but keep function for internal tracking
+        var validTrials = experimentData.filter(function(t) { return !t.error; });
+        var avgTime = validTrials.length > 0
+            ? Math.round(validTrials.reduce(function(sum, t) { return sum + t.completionTime; }, 0) / validTrials.length)
+            : 0;
+
+        var errorCount = experimentData.filter(function(t) { return t.error; }).length;
+
+        // Don't display stats during experiment (hidden)
+        // Data is still collected for final results
+    }
+
+    function finishCondition() {
+        console.log('finishCondition called - currentExperimentIndex:', currentExperimentIndex, 'experimentOrder:', experimentOrder);
+
+        participantData.experiments.push({
+            condition: currentCondition,
+            order: currentExperimentIndex + 1,
+            data: experimentData
+        });
+
+        console.log('Saved', experimentData.length, 'trials for condition:', currentCondition);
+
+        currentExperimentIndex++;
+
+        if (currentExperimentIndex < experimentOrder.length) {
+            console.log('Moving to rest screen before condition', currentExperimentIndex + 1);
+            showScreen('screen-rest');
+            startRestTimer();
+        } else {
+            console.log('All conditions complete, showing results');
+            showResults();
+        }
+    }
+
+    function startRestTimer() {
+        var timeLeft = 3;
+
+        // Update message based on current progress
+        var conditionNumber = currentExperimentIndex; // 1 or 2 (0-indexed, so after 1st or 2nd condition)
+        var totalConditions = experimentOrder.length;
+        document.getElementById('rest-message').textContent =
+            conditionNumber + '번째 실험이 완료되었습니다. (총 ' + totalConditions + '개 중)';
+
+        document.getElementById('rest-countdown').textContent = timeLeft;
+
+        if (restInterval) {
+            clearInterval(restInterval);
+        }
+
+        restInterval = setInterval(function() {
+            timeLeft--;
+            document.getElementById('rest-countdown').textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(restInterval);
+                document.getElementById('btn-continue').classList.remove('hidden');
+            }
+        }, 1000);
+    }
+
+    function continueToSecondExperiment() {
+        // Start the next condition in the order
+        startCondition(experimentOrder[currentExperimentIndex]);
+    }
+
+    function showResults() {
+        showScreen('screen-results');
+
+        var fixedExp = null;
+        var staticExp = null;
+        var personalizedExp = null;
+
+        for (var i = 0; i < participantData.experiments.length; i++) {
+            if (participantData.experiments[i].condition === 'fixed') {
+                fixedExp = participantData.experiments[i];
+            } else if (participantData.experiments[i].condition === 'static') {
+                staticExp = participantData.experiments[i];
+            } else if (participantData.experiments[i].condition === 'personalized') {
+                personalizedExp = participantData.experiments[i];
+            }
+        }
+
+        if (fixedExp) {
+            var validTrials = fixedExp.data.filter(function(t) { return !t.error; });
+            var avgTime = validTrials.length > 0 ? validTrials.reduce(function(sum, t) { return sum + t.completionTime; }, 0) / validTrials.length : 0;
+            var errorRate = (fixedExp.data.filter(function(t) { return t.error; }).length / fixedExp.data.length * 100);
+
+            document.getElementById('result-fixed-time').textContent = Math.round(avgTime) + ' ms';
+            document.getElementById('result-fixed-error').textContent = errorRate.toFixed(1) + '%';
+        }
+
+        if (staticExp) {
+            var validTrials = staticExp.data.filter(function(t) { return !t.error; });
+            var avgTime = validTrials.length > 0 ? validTrials.reduce(function(sum, t) { return sum + t.completionTime; }, 0) / validTrials.length : 0;
+            var errorRate = (staticExp.data.filter(function(t) { return t.error; }).length / staticExp.data.length * 100);
+
+            document.getElementById('result-static-time').textContent = Math.round(avgTime) + ' ms';
+            document.getElementById('result-static-error').textContent = errorRate.toFixed(1) + '%';
+        }
+
+        if (personalizedExp) {
+            var validTrials = personalizedExp.data.filter(function(t) { return !t.error; });
+            var avgTime = validTrials.length > 0 ? validTrials.reduce(function(sum, t) { return sum + t.completionTime; }, 0) / validTrials.length : 0;
+            var errorRate = (personalizedExp.data.filter(function(t) { return t.error; }).length / personalizedExp.data.length * 100);
+
+            document.getElementById('result-personalized-time').textContent = Math.round(avgTime) + ' ms';
+            document.getElementById('result-personalized-error').textContent = errorRate.toFixed(1) + '%';
+        }
+
+        // Auto-upload results
+        uploadResults();
+    }
+
+    // Upload results to Google Sheets via Apps Script
+    function uploadResults() {
+        var results = {
+            participant: {
+                name: participantData.name,
+                studentId: participantData.studentId,
+                handedness: participantData.handedness,
+                timestamp: participantData.timestamp,
+                deviceInfo: participantData.deviceInfo,
+                calculatedArc: participantData.calculatedArc,
+                touchPosition: participantData.touchPosition
+            },
+            calibration: {
+                reachablePoints: participantData.reachableZone.length,
+                points: participantData.reachableZone,
+                calculatedArc: participantData.calculatedArc
+            },
+            experiments: participantData.experiments.map(function(exp) {
+                var validTrials = exp.data.filter(function(t) { return !t.error; });
+                return {
+                    condition: exp.condition,
+                    order: exp.order,
+                    avgCompletionTime: validTrials.reduce(function(sum, t) { return sum + t.completionTime; }, 0) / validTrials.length,
+                    errorRate: exp.data.filter(function(t) { return t.error; }).length / exp.data.length,
+                    trials: exp.data
+                };
+            })
+        };
+
+        var uploadStatus = document.getElementById('upload-status');
+        uploadStatus.className = 'upload-status uploading';
+        uploadStatus.innerHTML = '<div class="loading"></div><p style="margin-top: 10px;">결과 업로드 중...</p>';
+
+        // Send to Google Apps Script
+        fetch(UPLOAD_URL, {
+            method: 'POST',
+            mode: 'no-cors',  // Important for Google Apps Script
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(results)
+        })
+            .then(function() {
+                // no-cors mode doesn't return response, so we assume success
+                uploadStatus.className = 'upload-status success';
+                uploadStatus.innerHTML = '<p style="color: #10b981; font-weight: 600; font-size: 18px;">✓ 결과가 성공적으로 저장되었습니다!</p><p style="margin-top: 10px;">실험에 참여해 주셔서 감사합니다.</p>';
+                showAlert('결과가 자동으로 저장되었습니다!', 'success');
+            })
+            .catch(function(error) {
+                console.error('Upload error:', error);
+                uploadStatus.className = 'upload-status error';
+                uploadStatus.innerHTML = '<p style="color: #ef4444; font-weight: 600;">⚠ 자동 업로드에 실패했습니다</p><p style="margin-top: 5px; font-size: 14px;">아래 버튼을 눌러 수동으로 다운로드해주세요.</p>';
+                document.getElementById('btn-download').classList.remove('hidden');
+                showAlert('자동 저장에 실패했습니다. 백업 다운로드 버튼을 사용해주세요.', 'error');
+            });
+    }
+
+    // Download results function (backup)
+    function downloadResults() {
+        var results = {
+            participant: {
+                name: participantData.name,
+                studentId: participantData.studentId,
+                handedness: participantData.handedness,
+                timestamp: participantData.timestamp
+            },
+            calibration: {
+                reachablePoints: participantData.reachableZone.length,
+                points: participantData.reachableZone
+            },
+            experiments: participantData.experiments.map(function(exp) {
+                var validTrials = exp.data.filter(function(t) { return !t.error; });
+                return {
+                    condition: exp.condition,
+                    order: exp.order,
+                    avgCompletionTime: validTrials.reduce(function(sum, t) { return sum + t.completionTime; }, 0) / validTrials.length,
+                    errorRate: exp.data.filter(function(t) { return t.error; }).length / exp.data.length,
+                    trials: exp.data
+                };
+            })
+        };
+
+        var dataStr = JSON.stringify(results, null, 2);
+        var blob = new Blob([dataStr], {type: 'application/json'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'result_' + participantData.studentId + '_' + Date.now() + '.json';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setTimeout(function() {
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        showAlert('결과 파일이 다운로드되었습니다. 구글 폼에 업로드해주세요.', 'success');
+    }
+</script>
+</body>
+</html>
